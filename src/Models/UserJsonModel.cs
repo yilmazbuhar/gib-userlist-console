@@ -13,7 +13,7 @@
         public string Id { get; set; }
         public string Alias { get; set; }
         public DateTime? AliasCreationTime { get; set; }
-        public DateTime? DeactivateDate { get; set; }
+        public DateTime? DeactivateDate { get; set; } = DateTime.MinValue;
         public string AppType { get; set; }
         public string FirstCreationTime { get; set; }
         public string GibAliasType { get; set; }

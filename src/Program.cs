@@ -1,27 +1,37 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using GibUserSync;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nest;
 using System.Globalization;
 using System.Xml;
 using System.Xml.Serialization;
 
-var serviceProvider = ConfigureServices.Configure();
+
+var (serviceProvider,config) = ConfigureServices.Configure();
 var elasticClient = serviceProvider.GetService<ElasticClient>();
+ElasticSearchConfig elasticSearchConfig = config.GetRequiredSection("ElasticSearchConfig").Get<ElasticSearchConfig>();
 
 using (XmlReader reader = XmlReader.Create(@"gibusers.xml"))
 {
+    List<UserJsonModel> users = new List<UserJsonModel>();
     while (reader.Read())
     {
         if (reader.IsStartElement() && reader.Name.ToString() == "User")
         {
-            var user = GetUser(reader.ReadOuterXml());
-            if (user == null)
-                continue;
-
-            var indexResponse = await elasticClient.IndexManyAsync(user);
+            users.AddRange(GetUser(reader.ReadOuterXml()));
+            //if (user == null)
+            //    continue;
+            if (users.Count >= elasticSearchConfig.BulkInsertCount)
+            {
+                await elasticClient.IndexManyAsync(users);
+                users = new List<UserJsonModel>();
+            }
+            //elasticClient.Indices.Refresh();
         }
     }
+
+    users = null;
 }
 Console.ReadKey();
 
@@ -35,7 +45,7 @@ List<UserJsonModel>? GetUser(string xml)
     using (TextReader reader = new StringReader(xml))
     {
         var userXml = (UserXml)serializer.Deserialize(reader);
-        
+
         if (userXml == null)
             return null;
 
