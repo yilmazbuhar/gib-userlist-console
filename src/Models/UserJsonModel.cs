@@ -1,15 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GibUserSync
+﻿namespace GibUserSync
 {
-    internal class UserJsonModel
+    internal class UserJsonModel : ICloneable
     {
+        public UserJsonModel(UserXml userXml)
+        {
+            Identifier = userXml.Identifier;
+            FirstCreationTime = userXml.FirstCreationTime;
+            Title = userXml.Title;
+            GibUserType = userXml.Type;
+        }
+
+        public string Id { get; set; }
         public string Alias { get; set; }
-        public string AliasCreationTime { get; set; }
+        public DateTime? AliasCreationTime { get; set; }
         public DateTime? DeactivateDate { get; set; }
         public string AppType { get; set; }
         public string FirstCreationTime { get; set; }
@@ -17,5 +20,10 @@ namespace GibUserSync
         public string GibUserType { get; set; }
         public string Identifier { get; set; }
         public string Title { get; set; }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }

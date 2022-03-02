@@ -3,7 +3,7 @@
 namespace GibUserSync
 {
 	[XmlRoot(ElementName = "User")]
-	public class User
+	public class UserXml
 	{
 		[XmlElement(ElementName = "Identifier")]
 		public string Identifier { get; set; }
