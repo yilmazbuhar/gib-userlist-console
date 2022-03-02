@@ -3,36 +3,41 @@ using GibUserSync;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nest;
+using System.Diagnostics;
 using System.Globalization;
 using System.Xml;
 using System.Xml.Serialization;
 
 
-var (serviceProvider,config) = ConfigureServices.Configure();
+var (serviceProvider, config) = ConfigureServices.Configure();
 var elasticClient = serviceProvider.GetService<ElasticClient>();
 ElasticSearchConfig elasticSearchConfig = config.GetRequiredSection("ElasticSearchConfig").Get<ElasticSearchConfig>();
+//Channel<List<UserJsonModel>> channel = Channel.CreateUnbounded<List<UserJsonModel>>();
 
-using (XmlReader reader = XmlReader.Create(@"gibusers.xml"))
+List<UserJsonModel> users = new List<UserJsonModel>();
+Console.WriteLine(await StopwatchAction(async () =>
 {
-    List<UserJsonModel> users = new List<UserJsonModel>();
-    while (reader.Read())
+    using (XmlReader reader = XmlReader.Create(@"gibusers.xml"))
     {
-        if (reader.IsStartElement() && reader.Name.ToString() == "User")
+        while (reader.Read())
         {
-            users.AddRange(GetUser(reader.ReadOuterXml()));
-            //if (user == null)
-            //    continue;
-            if (users.Count >= elasticSearchConfig.BulkInsertCount)
+            if (reader.IsStartElement() && reader.Name.ToString() == "User")
             {
-                await elasticClient.IndexManyAsync(users);
-                users = new List<UserJsonModel>();
-            }
-            //elasticClient.Indices.Refresh();
-        }
-    }
+                GetUser(reader.ReadOuterXml());
 
-    users = null;
-}
+                if (users.Count >= elasticSearchConfig.BulkInsertCount)
+                {
+                    await elasticClient.IndexManyAsync(users);
+                    users = new List<UserJsonModel>();
+                }
+                //elasticClient.Indices.Refresh();
+            }
+        }
+
+        users = null;
+    }
+}));
+
 Console.ReadKey();
 
 List<UserJsonModel>? GetUser(string xml)
@@ -49,7 +54,6 @@ List<UserJsonModel>? GetUser(string xml)
         if (userXml == null)
             return null;
 
-        List<UserJsonModel> users = new List<UserJsonModel>();
         UserJsonModel baseuser = new UserJsonModel(userXml);
 
         foreach (var doc in userXml.Documents.Document)
@@ -75,4 +79,13 @@ List<UserJsonModel>? GetUser(string xml)
 
         return users;
     }
+}
+
+async Task<double> StopwatchAction(Func<Task> callback)
+{
+    Stopwatch sw = Stopwatch.StartNew();
+    await callback();
+    sw.Stop();
+
+    return sw.Elapsed.TotalSeconds;
 }
