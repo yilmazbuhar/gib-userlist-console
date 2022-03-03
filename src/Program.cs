@@ -56,10 +56,6 @@ List<UserJsonModel>? AddUserFromXmlNode(string xml)
             return null;
 
         UserJsonModel baseuser = new UserJsonModel(userXml);
-        userXml.Documents.Document.ForEach(x =>
-        {
-
-        });
 
         foreach (var doc in userXml.Documents.Document)
         {
