@@ -7,7 +7,7 @@
 
 To use docker composer install, [Docker](https://www.docker.com/products/docker-desktop)<br>
 
-### Run
+### Run container
 
 Before run, add `gibuser.xml` file to `src` folder
 
