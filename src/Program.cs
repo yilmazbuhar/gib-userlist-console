@@ -12,6 +12,7 @@ using System.Xml.Serialization;
 var (serviceProvider, config) = ConfigureServices.Configure();
 var elasticClient = serviceProvider.GetService<ElasticClient>();
 ElasticSearchConfig elasticSearchConfig = config.GetRequiredSection("ElasticSearchConfig").Get<ElasticSearchConfig>();
+
 //Channel<List<UserJsonModel>> channel = Channel.CreateUnbounded<List<UserJsonModel>>();
 
 List<UserJsonModel> users = new List<UserJsonModel>();
@@ -23,7 +24,7 @@ Console.WriteLine(await StopwatchAction(async () =>
         {
             if (reader.IsStartElement() && reader.Name.ToString() == "User")
             {
-                GetUser(reader.ReadOuterXml());
+                AddUserFromXmlNode(reader.ReadOuterXml());
 
                 if (users.Count >= elasticSearchConfig.BulkInsertCount)
                 {
@@ -40,7 +41,7 @@ Console.WriteLine(await StopwatchAction(async () =>
 
 Console.ReadKey();
 
-List<UserJsonModel>? GetUser(string xml)
+List<UserJsonModel>? AddUserFromXmlNode(string xml)
 {
     if (string.IsNullOrEmpty(xml))
         return null;
@@ -55,6 +56,10 @@ List<UserJsonModel>? GetUser(string xml)
             return null;
 
         UserJsonModel baseuser = new UserJsonModel(userXml);
+        userXml.Documents.Document.ForEach(x =>
+        {
+
+        });
 
         foreach (var doc in userXml.Documents.Document)
         {
