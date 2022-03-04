@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using GibUserSync;
+﻿using GibUserSync;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nest;
@@ -26,11 +25,7 @@ Console.WriteLine(await StopwatchAction(async () =>
             {
                 AddUserFromXmlNode(reader.ReadOuterXml());
 
-                if (users.Count >= elasticSearchConfig.BulkInsertCount)
-                {
-                    await elasticClient.IndexManyAsync(users);
-                    users = new List<UserJsonModel>();
-                }
+                await BulkIndex();
                 //elasticClient.Indices.Refresh();
             }
         }
@@ -41,10 +36,19 @@ Console.WriteLine(await StopwatchAction(async () =>
 
 Console.ReadKey();
 
-List<UserJsonModel>? AddUserFromXmlNode(string xml)
+async Task BulkIndex()
+{
+    if (users.Count < elasticSearchConfig.BulkInsertCount)
+        return;
+
+    await elasticClient.IndexManyAsync(users);
+    users = new List<UserJsonModel>();
+}
+
+async Task AddUserFromXmlNode(string xml)
 {
     if (string.IsNullOrEmpty(xml))
-        return null;
+        return;
 
     var serializer = new XmlSerializer(typeof(UserXml));
 
@@ -53,7 +57,7 @@ List<UserJsonModel>? AddUserFromXmlNode(string xml)
         var userXml = (UserXml)serializer.Deserialize(reader);
 
         if (userXml == null)
-            return null;
+            return;
 
         UserJsonModel baseuser = new UserJsonModel(userXml);
 
@@ -77,8 +81,6 @@ List<UserJsonModel>? AddUserFromXmlNode(string xml)
 
             users.Add(user);
         }
-
-        return users;
     }
 }
 
