@@ -1,4 +1,5 @@
-﻿using GibUserSync;
+﻿// See https://aka.ms/new-console-template for more information
+using GibUserSync;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nest;
@@ -14,7 +15,7 @@ ElasticSearchConfig elasticSearchConfig = config.GetRequiredSection("ElasticSear
 
 //Channel<List<UserJsonModel>> channel = Channel.CreateUnbounded<List<UserJsonModel>>();
 
-List<UserJsonModel> users = new List<UserJsonModel>();
+List<UserJsonModel>? users = new List<UserJsonModel>();
 Console.WriteLine(await StopwatchAction(async () =>
 {
     using (XmlReader reader = XmlReader.Create(@"gibusers.xml"))
@@ -45,7 +46,7 @@ async Task BulkIndex()
     users = new List<UserJsonModel>();
 }
 
-async Task AddUserFromXmlNode(string xml)
+void AddUserFromXmlNode(string xml)
 {
     if (string.IsNullOrEmpty(xml))
         return;
