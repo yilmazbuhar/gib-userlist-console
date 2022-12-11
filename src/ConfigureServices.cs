@@ -16,11 +16,14 @@ namespace GibUserSync
                 .Build();
 
             services.AddSingleton(config);
+            services.AddHttpClient<IGibDownloadService, GibDownloadService>(client =>
+            {
+                client.BaseAddress = new Uri(config["Application:EfaturaServiceUri"]);
+            });
 
             ElasticSearchConfig elasticConfig = config.GetRequiredSection("ElasticSearchConfig").Get<ElasticSearchConfig>();
 
-            var settings = new ConnectionSettings(new Uri(elasticConfig.Host))
-                .DefaultIndex(elasticConfig.Index);
+            var settings = new ConnectionSettings(new Uri(elasticConfig.Host)).DefaultIndex(elasticConfig.Index);
             var client = new ElasticClient(settings);
             
             services.AddSingleton(client);

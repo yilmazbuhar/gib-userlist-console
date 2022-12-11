@@ -10,7 +10,8 @@ using System.Xml.Serialization;
 
 
 var (serviceProvider, config) = ConfigureServices.Configure();
-var elasticClient = serviceProvider.GetService<ElasticClient>();
+var _elasticClient = serviceProvider.GetService<ElasticClient>();
+var _gibDownloadService = serviceProvider.GetService<IGibDownloadService>();
 ElasticSearchConfig elasticSearchConfig = config.GetRequiredSection("ElasticSearchConfig").Get<ElasticSearchConfig>();
 
 //Channel<List<UserJsonModel>> channel = Channel.CreateUnbounded<List<UserJsonModel>>();
@@ -18,7 +19,7 @@ ElasticSearchConfig elasticSearchConfig = config.GetRequiredSection("ElasticSear
 List<UserJsonModel>? users = new List<UserJsonModel>();
 Console.WriteLine(await StopwatchAction(async () =>
 {
-    using (XmlReader reader = XmlReader.Create(@"gibusers.xml"))
+    using (XmlReader reader = XmlReader.Create(await _gibDownloadService.GetNewUserGbList()))
     {
         while (reader.Read())
         {
@@ -42,7 +43,7 @@ async Task BulkIndex()
     if (users.Count < elasticSearchConfig.BulkInsertCount)
         return;
 
-    await elasticClient.IndexManyAsync(users);
+    await _elasticClient.IndexManyAsync(users);
     users = new List<UserJsonModel>();
 }
 
