@@ -24,23 +24,7 @@ if (app.Environment.IsDevelopment())
     app.UseHangfireDashboard();
 }
 
-RecurringJob.AddOrUpdate<IGibDownloadService>(service => service.GetNewUserPkList(), Cron.Hourly);
-
-//app.MapGet("/weatherforecast", () =>
-//{
-//    var forecast = Enumerable.Range(1, 5).Select(index =>
-//        new WeatherForecast
-//        (
-//            DateTime.Now.AddDays(index),
-//            Random.Shared.Next(-20, 55),
-//            summaries[Random.Shared.Next(summaries.Length)]
-//        ))
-//        .ToArray();
-//    return forecast;
-//})
-//.WithName("GetWeatherForecast");
-
-
+RecurringJob.AddOrUpdate<IGibDataService>(service => service.GetNewUserPkList(), Cron.Hourly);
 
 app.Run();
 
@@ -82,13 +66,4 @@ async Task AddUserFromXmlNode(string xml)
             users.Add(user);
         }
     }
-}
-
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary);
-
-internal class WeatherForecastAlt {
-
-    public DateOnly Date { get; init; }
-    public int Temperature { get; init; }
-    public string Summary { get; init; }
 }

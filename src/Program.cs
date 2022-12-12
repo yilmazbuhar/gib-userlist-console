@@ -16,25 +16,11 @@ ElasticSearchConfig elasticSearchConfig = config.GetRequiredSection("ElasticSear
 
 //Channel<List<UserJsonModel>> channel = Channel.CreateUnbounded<List<UserJsonModel>>();
 
-List<UserJsonModel>? users = new List<UserJsonModel>();
-Console.WriteLine(await StopwatchAction(async () =>
-{
-    using (XmlReader reader = XmlReader.Create(await _gibDownloadService.GetNewUserGbList()))
-    {
-        while (reader.Read())
-        {
-            if (reader.IsStartElement() && reader.Name.ToString() == "User")
-            {
-                AddUserFromXmlNode(reader.ReadOuterXml());
 
-                await BulkIndex();
-                //elasticClient.Indices.Refresh();
-            }
-        }
-
-        users = null;
-    }
-}));
+//Console.WriteLine(await StopwatchAction(async () =>
+//{
+    
+//}));
 
 Console.ReadKey();
 
@@ -47,44 +33,7 @@ async Task BulkIndex()
     users = new List<UserJsonModel>();
 }
 
-void AddUserFromXmlNode(string xml)
-{
-    if (string.IsNullOrEmpty(xml))
-        return;
 
-    var serializer = new XmlSerializer(typeof(UserXml));
-
-    using (TextReader reader = new StringReader(xml))
-    {
-        var userXml = (UserXml)serializer.Deserialize(reader);
-
-        if (userXml == null)
-            return;
-
-        UserJsonModel baseuser = new UserJsonModel(userXml);
-
-        foreach (var doc in userXml.Documents.Document)
-        {
-            var alias = doc.Alias.FirstOrDefault(x => x.DeletionTime == null) ??
-                doc.Alias.OrderByDescending(x => x.DeletionTime).FirstOrDefault();
-
-            var user = (UserJsonModel)baseuser.Clone();
-
-            if (alias?.DeletionTime != null)
-                user.DeactivateDate = alias.DeletionTime;
-
-            user.AliasCreationTime = alias.CreationTime;
-            user.AppType = doc.Type;
-            user.Alias = alias.Name;
-
-            // set id programmatically to update existing data
-            // we assume that the Identifier is unique
-            user.Id = $"{userXml.Identifier}{doc.Type.ToLower(CultureInfo.InvariantCulture)}";
-
-            users.Add(user);
-        }
-    }
-}
 
 async Task<double> StopwatchAction(Func<Task> callback)
 {

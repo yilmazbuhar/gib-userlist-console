@@ -1,17 +1,9 @@
-﻿using System.Diagnostics;
-
-namespace GibUsers.Api
+﻿namespace GibUsers.Api
 {
-    public interface IGibDownloadService
-    {
-        Task<Stream> GetNewUserGbList();
-        Task<Stream> GetNewUserPkList();
-    }
-
-    public class GibDownloadService : IGibDownloadService
+    public class GibDataService : IGibDataService
     {
         private readonly HttpClient _httpClient;
-        public GibDownloadService(HttpClient httpClient)
+        public GibDataService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
