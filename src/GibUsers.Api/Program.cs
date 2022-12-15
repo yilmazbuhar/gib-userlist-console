@@ -1,5 +1,7 @@
 using GibUsers.Api;
+using GibUsers.Api.ElasticSearch;
 using Hangfire;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,15 +25,11 @@ if (app.Environment.IsDevelopment())
 
 
 var hangfirejob = app.Services.GetService<IHangfireJobs>();
-//await hangfirejob.GibUsersSync();
-RecurringJob.AddOrUpdate<IHangfireJobs>(service => hangfirejob.GibUsersSync(), Cron.Hourly);
+RecurringJob.AddOrUpdate<IHangfireJobs>(service => hangfirejob.GibUsersSync(), Cron.MinuteInterval(30));
 
-app.MapPost("/todoitems", async (string todo) =>
+app.MapGet("/api/search/{term}", async (string term, IElasticService elasticService) =>
 {
-    //db.Todos.Add(todo);
-    //await db.SaveChangesAsync();
-
-    //return Results.Created($"/todoitems/{todo.Id}", todo);
+    return Results.Ok(await elasticService.Search(term));
 });
 
 app.Run();

@@ -18,14 +18,22 @@ namespace GibUsers.Api.ElasticSearch
 
         public async Task<BulkResponse> BulkIndex(List<UserJsonModel>? users)
         {
-            var response = await _elasticsearchClient.IndexManyAsync(users);
-            
-            return response;
+            return await _elasticsearchClient.IndexManyAsync(users);
         }
 
-        public Task<List<UserJsonModel>> Search(string term)
+        public async Task<List<UserJsonModel>> Search(string term)
         {
-            throw new NotImplementedException();
+            var query = await _elasticsearchClient.SearchAsync<UserJsonModel>(s => s
+            .From(0)
+            .Take(10)
+            .Query(qry => qry
+                .Bool(b => b
+                .Must(m => m
+                .QueryString(qs => qs
+                .DefaultField("_all")
+                .Query(term))))));
+
+            return query.Documents.ToList();
         }
     }
 }

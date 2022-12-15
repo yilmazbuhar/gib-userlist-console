@@ -1,4 +1,5 @@
-﻿using Nest;
+﻿using GibUsers.Api.ElasticSearch;
+using Nest;
 using System.Globalization;
 using System.Xml;
 using System.Xml.Serialization;
@@ -7,10 +8,10 @@ namespace GibUsers.Api
 {
     public class ElasticSyncService : ISyncService, IDisposable
     {
-        private readonly ElasticClient _elasticsearchClient;
-        public ElasticSyncService(ElasticClient elasticClient)
+        private readonly IElasticService _elasticsearchService;
+        public ElasticSyncService(IElasticService elasticService)
         {
-            _elasticsearchClient = elasticClient;
+            _elasticsearchService = elasticService;
         }
 
         public async Task SyncDataAsync(Stream stream)
@@ -81,8 +82,7 @@ namespace GibUsers.Api
 
         async Task<BulkResponse> BulkIndex(List<UserJsonModel>? users)
         {
-            var response = await _elasticsearchClient.IndexManyAsync(users);
-            return response;
+            return await _elasticsearchService.BulkIndex(users);
         }
 
         public void Dispose()
