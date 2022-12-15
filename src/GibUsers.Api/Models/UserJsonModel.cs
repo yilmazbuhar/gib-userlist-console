@@ -1,6 +1,6 @@
 ﻿namespace GibUsers.Api
 {
-    internal class UserJsonModel : ICloneable
+    public class UserJsonModel : ICloneable
     {
         public UserJsonModel(UserXml userXml)
         {

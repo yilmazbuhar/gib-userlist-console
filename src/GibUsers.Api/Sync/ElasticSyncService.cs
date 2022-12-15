@@ -1,34 +1,44 @@
-﻿using Microsoft.Extensions.Options;
-using Nest;
+﻿using Nest;
 using System.Globalization;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace GibUsers.Api
 {
-    public interface ISyncService
+    public class ElasticSyncService : ISyncService, IDisposable
     {
-        Task SyncDataAsync();
-    }
-
-
-    public abstract class BaseElasticSyncService : ISyncService, IDisposable
-    {
-        private readonly IGibDataService _gibDataService;
-        //private Stream _dataStream;
-        
-        private readonly ElasticSearchConfig _elasticSearchConfig;
         private readonly ElasticClient _elasticsearchClient;
-        public BaseElasticSyncService(IGibDataService gibDataService,
-            ElasticClient elasticClient,
-            IOptions<ElasticSearchConfig> elasticSearchConfig)
+        public ElasticSyncService(ElasticClient elasticClient)
         {
-            _gibDataService = gibDataService;
             _elasticsearchClient = elasticClient;
-            _elasticSearchConfig = elasticSearchConfig.Value;
         }
 
-        public abstract Task<Stream> GetData();
+        public async Task SyncDataAsync(Stream stream)
+        {
+            var list = Enumerable.Chunk(Data(stream), 5000);
+            
+            foreach (var item in list)
+            {
+                await BulkIndex(item.ToList());
+            }
+        }
+
+        IEnumerable<UserJsonModel> Data(Stream stream)
+        {
+            using (XmlReader reader = XmlReader.Create(stream))
+            {
+                while (reader.Read())
+                {
+                    if (reader.IsStartElement() && reader.Name.ToString() == "User")
+                    {
+                        foreach (var item in AddUserFromXmlNode(reader.ReadOuterXml()))
+                        {
+                            yield return item;
+                        }
+                    }
+                }
+            }
+        }
 
         IEnumerable<UserJsonModel> AddUserFromXmlNode(string xml)
         {
@@ -69,35 +79,10 @@ namespace GibUsers.Api
             }
         }
 
-        async Task BulkIndex(List<UserJsonModel>? users)
+        async Task<BulkResponse> BulkIndex(List<UserJsonModel>? users)
         {
-            await _elasticsearchClient.IndexManyAsync(users);
-        }
-
-        public async Task SyncDataAsync()
-        {
-            var dataStream = await GetData();
-            List<UserJsonModel>? users = new List<UserJsonModel>();
-
-            using (XmlReader reader = XmlReader.Create(dataStream))
-            {
-                while (reader.Read())
-                {
-                    if (reader.IsStartElement() && reader.Name.ToString() == "User")
-                    {
-                        users.AddRange(AddUserFromXmlNode(await reader.ReadOuterXmlAsync()));
-
-                        if (users.Count >= _elasticSearchConfig.BulkInsertCount)
-                        {
-                            await BulkIndex(users);
-                            users = new List<UserJsonModel>();
-                        }
-                    }
-                }
-                await BulkIndex(users);
-                
-                users = null;
-            }
+            var response = await _elasticsearchClient.IndexManyAsync(users);
+            return response;
         }
 
         public void Dispose()
