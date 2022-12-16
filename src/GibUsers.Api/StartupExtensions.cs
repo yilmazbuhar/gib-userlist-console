@@ -1,4 +1,5 @@
-﻿using Hangfire;
+﻿using GibUsers.Api.ElasticSearch;
+using Hangfire;
 using Microsoft.Extensions.Options;
 using Nest;
 
@@ -27,6 +28,7 @@ namespace GibUsers.Api
             // Elastic config
             services.AddSingleton<ISyncService, ElasticSyncService>();
             services.AddSingleton<IHangfireJobs, HangfireJobs>();
+            services.AddSingleton<IElasticService, ElasticService>();
 
             return services;
         }

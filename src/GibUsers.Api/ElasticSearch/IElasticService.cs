@@ -28,10 +28,9 @@ namespace GibUsers.Api.ElasticSearch
             .Take(10)
             .Query(qry => qry
                 .Bool(b => b
-                .Must(m => m
-                .QueryString(qs => qs
-                .DefaultField("_all")
-                .Query(term))))));
+                .Should(m => m.Match(qs => qs.Field("identifier.keyword").Query(term))))));
+
+            //{"query":{"bool":{"must":[],"must_not":[],"should":[{"match":{"identifier.keyword":"67711226990"}}]}},"from":0,"size":1000,"sort":[],"aggs":{}}
 
             return query.Documents.ToList();
         }

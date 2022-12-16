@@ -3,6 +3,7 @@
 
     public interface IHangfireJobs
     {
-        Task GibUsersSync();
+        Task GibPkUsersSync();
+        Task GibGbUsersSync();
     }
 }
