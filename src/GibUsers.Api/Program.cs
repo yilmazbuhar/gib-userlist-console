@@ -24,8 +24,8 @@ if (app.Environment.IsDevelopment())
 }
 
 var hangfirejob = app.Services.GetService<IHangfireJobs>();
-RecurringJob.AddOrUpdate<IHangfireJobs>(service => hangfirejob.GibGbUsersSync(), Cron.MinuteInterval(30));
-RecurringJob.AddOrUpdate<IHangfireJobs>(service => hangfirejob.GibPkUsersSync(), Cron.MinuteInterval(30));
+
+app.Services.AddHangFireJobs(builder.Configuration);
 
 app.MapGet("/api/search/{identifier}", async (string identifier, IElasticService elasticService) =>
 {

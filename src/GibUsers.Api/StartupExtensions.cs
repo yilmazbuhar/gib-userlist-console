@@ -25,12 +25,21 @@ namespace GibUsers.Api
                 client.BaseAddress = new Uri(configuration["Application:EfaturaServiceUri"]);
             });
 
-            // Elastic config
+            // Application services
             services.AddSingleton<ISyncService, ElasticSyncService>();
             services.AddSingleton<IHangfireJobs, HangfireJobs>();
             services.AddSingleton<IElasticService, ElasticService>();
 
             return services;
+        }
+
+        public static void AddHangFireJobs(this IServiceProvider serviceProvider, IConfiguration configuration)
+        {
+            var hangfirejob = serviceProvider.GetService<IHangfireJobs>();
+            var minuteInterval = Convert.ToInt32(configuration["Application:HangfireMinuteInterval"]);
+
+            RecurringJob.AddOrUpdate<IHangfireJobs>(service => hangfirejob.GibGbUsersSync(), Cron.MinuteInterval(minuteInterval));
+            RecurringJob.AddOrUpdate<IHangfireJobs>(service => hangfirejob.GibPkUsersSync(), Cron.MinuteInterval(minuteInterval));
         }
 
         public static IServiceCollection AddElasticClient(this IServiceCollection services, IConfiguration configuration)
@@ -41,7 +50,7 @@ namespace GibUsers.Api
             var serviceProvider = services.BuildServiceProvider();
 
             var elasticConfig = serviceProvider.GetRequiredService<IOptions<ElasticSearchConfig>>().Value;
-            //ElasticSearchConfig elasticConfig1 = configuration.GetRequiredSection("ElasticSearchConfig").Get<ElasticSearchConfig>();
+            
             var settings = new ConnectionSettings(new Uri(elasticConfig.Host)).DefaultIndex(elasticConfig.Index);
             if (!string.IsNullOrEmpty(elasticConfig.Username) && !string.IsNullOrEmpty(elasticConfig.Password))
             {
