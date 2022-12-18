@@ -1,6 +1,6 @@
 # Gib User Elastic Search Indexer
 
-Gelir İdaresi Başkanlığı, https://merkeztest.efatura.gov.tr adresindeki e-Fatura mükellef PK ve GB listelerini elasticsearch üzerine indexlemek için bu uygulamayı host edebilirsiniz. Uygulamaüzerindeki hangfire, belirlediğiniz aralıklarla elasticsearch indexlerinizi güncelleyecektir. Ek olarak VKN sorgulamak içinde bir uç noktası eklenmiştir. 
+Gelir İdaresi Başkanlığı, https://merkeztest.efatura.gov.tr adresindeki e-Fatura mükellef PK ve GB listelerini elasticsearch üzerine indexlemek için bu uygulamayı host edebilirsiniz. Uygulama üzerindeki hangfire, belirlediğiniz aralıklarla elasticsearch indexlerinizi güncelleyecektir. Ek olarak VKN sorgulamak içinde bir uç noktası eklenmiştir. 
 
 ### İhtiyaçlar
 
