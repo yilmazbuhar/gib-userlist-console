@@ -43,7 +43,11 @@ namespace GibUsers.Api
             var elasticConfig = serviceProvider.GetRequiredService<IOptions<ElasticSearchConfig>>().Value;
             //ElasticSearchConfig elasticConfig1 = configuration.GetRequiredSection("ElasticSearchConfig").Get<ElasticSearchConfig>();
             var settings = new ConnectionSettings(new Uri(elasticConfig.Host)).DefaultIndex(elasticConfig.Index);
-            //settings.BasicAuthentication(elasticConfig.Username, elasticConfig.Password);
+            if (!string.IsNullOrEmpty(elasticConfig.Username) && !string.IsNullOrEmpty(elasticConfig.Password))
+            {
+                settings.BasicAuthentication(elasticConfig.Username, elasticConfig.Password);
+            }
+
             //settings.EnableApiVersioningHeader();
             var client = new ElasticClient(settings);
 
