@@ -23,8 +23,6 @@ if (app.Environment.IsDevelopment())
     app.UseHangfireDashboard();
 }
 
-var hangfirejob = app.Services.GetService<IHangfireJobs>();
-
 app.Services.AddHangFireJobs(builder.Configuration);
 
 app.MapGet("/api/search/{identifier}", async (string identifier, IElasticService elasticService) =>
