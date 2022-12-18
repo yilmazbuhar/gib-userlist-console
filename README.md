@@ -17,7 +17,7 @@ docker-compose up
 
 [http://localhost:5005/hangfire](http://localhost:5005/hangfire)
 
-Enable Elastic Search Basic Authentication, add following line to appsettings.json `ElasticSearchConfig` node.
+To enable Elastic Search Basic Authentication, add following line to appsettings.json `ElasticSearchConfig` node.
 
 ```
  "Username": "your_username",
