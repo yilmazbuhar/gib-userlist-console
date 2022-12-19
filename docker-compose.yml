@@ -31,18 +31,18 @@ services:
       - 5601:5601
     depends_on:
       - elasticsearch
-    web:
-        build: .
-        ports:
-            - "5005:5005"
-        depends_on:
-            - db
-    db:
-        image: "mcr.microsoft.com/mssql/server:2019-latest"
-        environment:
-            SA_PASSWORD: "bwCPCTjpv2Y0Ww9v"
-            ACCEPT_EULA: "Y"
-            MSSQL_PID: "Express"
-        ports:
-            # optional, to access with mssm from host
-            - "1433:1433"
+  web:
+      build: .
+      ports:
+          - "5005:5005"
+      depends_on:
+          - db
+  db:
+      image: "mcr.microsoft.com/mssql/server:2019-latest"
+      environment:
+          SA_PASSWORD: "bwCPCTjpv2Y0Ww9v"
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: "Express"
+      ports:
+          # optional, to access with mssm from host
+          - "1433:1433"
