@@ -25,9 +25,14 @@ if (app.Environment.IsDevelopment())
 
 app.Services.AddHangFireJobs(builder.Configuration);
 
-app.MapGet("/api/search/{identifier}", async (string identifier, IElasticService elasticService) =>
+app.MapGet("/api/search/identifier/{identifier}", async (string identifier, IElasticService elasticService) =>
 {
     return Results.Ok(await elasticService.Search(identifier));
+});
+
+app.MapGet("/api/search/{identifier}", async (string identifier, IElasticService elasticService) =>
+{
+    return Results.Ok(await elasticService.SearchAll(identifier));
 });
 
 app.Run();

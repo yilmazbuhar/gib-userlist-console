@@ -6,6 +6,7 @@ namespace GibUsers.Api.ElasticSearch
     {
         Task<BulkResponse> BulkIndex(List<UserJsonModel>? users);
         Task<List<UserJsonModel>> Search(string term);
+        Task<List<UserJsonModel>> SearchAll(string term);
     }
 
     public class ElasticService : IElasticService
@@ -31,6 +32,22 @@ namespace GibUsers.Api.ElasticSearch
                 .Should(m => m.Match(qs => qs.Field("identifier.keyword").Query(term))))));
 
             //{"query":{"bool":{"must":[],"must_not":[],"should":[{"match":{"identifier.keyword":"67711226990"}}]}},"from":0,"size":1000,"sort":[],"aggs":{}}
+
+            return query.Documents.ToList();
+        }
+
+        public async Task<List<UserJsonModel>> SearchAll(string term)
+        {
+            var query = await _elasticsearchClient.SearchAsync<UserJsonModel>(s => s
+                .From(0)
+                .Take(15)
+                .Query(qry => qry
+                    .Bool(b => b
+                    .Should(m => m.Match(qs => qs
+                        .Field("identifier")
+                        .Field("alias")
+                        .Field("title")
+                        .Query(term))))));
 
             return query.Documents.ToList();
         }
